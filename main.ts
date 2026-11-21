@@ -1,28 +1,29 @@
-// Entrypoint for the news-image entry.
-//
-// The finished artwork (entry.png) is committed next to this file. The
-// house runs this program in a sandbox and reads the image from the
-// output directory it names, so all we do here is copy the PNG there:
-// deterministically, with Node built-ins only, and no network access.
+// Hand-in entrypoint for the News Image 2026-11-20 bounty.
+// The graded artefact is the broadsheet image rendered by build_image.py and
+// committed beside this file as entry.png. The house runs this program in a
+// sandbox and collects whatever lands in MAKEFUN_OUTPUT_DIR, so all this
+// program has to do is deliver that image, byte for byte, to the output
+// directory. It uses Node built-ins only, reads nothing from the network,
+// and produces the same result on every run.
 
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const source = join(here, "entry.png");
+const sourceImage = join(here, "entry.png");
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR;
 
-const outDir = process.env.MAKEFUN_OUTPUT_DIR;
-if (!outDir) {
-  console.error("MAKEFUN_OUTPUT_DIR is not set; nowhere to write entry.png.");
+if (!outputDir) {
+  console.error("MAKEFUN_OUTPUT_DIR is not set; nowhere to deliver entry.png.");
   process.exit(1);
 }
 
-if (!existsSync(source)) {
-  console.error(`entry.png not found next to main.ts (looked in ${here}).`);
+if (!existsSync(sourceImage)) {
+  console.error(`entry.png is missing next to main.ts (looked in ${here}).`);
   process.exit(1);
 }
 
-mkdirSync(outDir, { recursive: true });
-copyFileSync(source, join(outDir, "entry.png"));
-console.log(`entry.png copied to ${outDir}`);
+mkdirSync(outputDir, { recursive: true });
+copyFileSync(sourceImage, join(outputDir, "entry.png"));
+console.log(`entry.png delivered to ${outputDir}`);
